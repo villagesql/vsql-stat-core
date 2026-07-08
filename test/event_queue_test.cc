@@ -57,13 +57,14 @@ static void test_push_until_full_then_drop_newest() {
   // Full: the NEWEST (incoming) event is dropped, not an existing one.
   CHECK(q.push(row("d")) == false);
   CHECK(q.push(row("e")) == false);
-  CHECK(q.depth() == 3);     // still the first three
-  CHECK(q.dropped() == 2);   // two drops counted
+  CHECK(q.depth() == 3);   // still the first three
+  CHECK(q.dropped() == 2); // two drops counted
 }
 
 static void test_drain_fifo_and_partial() {
   EventQueue q(10);
-  for (int i = 0; i < 5; ++i) CHECK(q.push(row(std::to_string(i))));
+  for (int i = 0; i < 5; ++i)
+    CHECK(q.push(row(std::to_string(i))));
   CHECK(q.depth() == 5);
 
   std::vector<EventRow> out;
@@ -98,7 +99,7 @@ static void test_drain_then_refill() {
   CHECK(q.dropped() == 1);
 
   std::vector<EventRow> out;
-  CHECK(q.drain(out, 2) == 2);      // empties the queue
+  CHECK(q.drain(out, 2) == 2); // empties the queue
   CHECK(q.depth() == 0);
 
   // Space freed: new pushes succeed again; dropped() is cumulative (not reset).

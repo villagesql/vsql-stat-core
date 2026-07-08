@@ -50,10 +50,9 @@ std::atomic<bool> g_capturing{false};
 // take effect on reload -- resizing a live bounded queue is a later
 // refinement).
 EventQueue &queue() {
-  const int64_t cap =
-      (g_config.queue_capacity && *g_config.queue_capacity > 0)
-          ? *g_config.queue_capacity
-          : 100000;
+  const int64_t cap = (g_config.queue_capacity && *g_config.queue_capacity > 0)
+                          ? *g_config.queue_capacity
+                          : 100000;
   static EventQueue q(static_cast<size_t>(cap));
   return q;
 }
@@ -90,15 +89,34 @@ void on_statement(
   row.schema = arg_str(args.schema());
   row.sql_command = arg_str(args.sql_command());
   row.connection_id = args.connection_id();
+  row.port = args.port();
   row.in_transaction = args.in_transaction();
+  row.status = args.status();
+  row.sqlstate = arg_str(args.sqlstate());
+  row.error_message = arg_str(args.error_message());
+  row.warning_count = args.warning_count();
   row.query_start_utime = args.query_start_utime();
   row.query_time_secs = args.query_time_secs();
   row.lock_time_secs = args.lock_time_secs();
   row.rows_sent = args.rows_sent();
   row.rows_examined = args.rows_examined();
   row.rows_affected = args.rows_affected();
-  row.warning_count = args.warning_count();
-  row.status = args.status();
+  row.bytes_sent = args.bytes_sent();
+  row.bytes_received = args.bytes_received();
+  row.digest_text = arg_str(args.digest_text());
+  row.select_full_join = args.select_full_join();
+  row.select_full_range_join = args.select_full_range_join();
+  row.select_range = args.select_range();
+  row.select_range_check = args.select_range_check();
+  row.select_scan = args.select_scan();
+  row.sort_merge_passes = args.sort_merge_passes();
+  row.sort_range = args.sort_range();
+  row.sort_rows = args.sort_rows();
+  row.sort_scan = args.sort_scan();
+  row.created_tmp_tables = args.created_tmp_tables();
+  row.created_tmp_disk_tables = args.created_tmp_disk_tables();
+  row.no_index_used = args.no_index_used();
+  row.no_good_index_used = args.no_good_index_used();
 
   // Per-sink filter before we spend a queue slot (e.g. slow-log threshold).
   if (!g_sink->accept(row))
@@ -135,8 +153,7 @@ vef_next_wakeup_t on_flush(vef_wakeup_reason_t reason) {
   if (!batch.empty() && g_sink != nullptr) {
     std::string err;
     if (g_sink->flush(batch, err)) {
-      atomic_add(g_status.events_archived,
-                 static_cast<int64_t>(batch.size()));
+      atomic_add(g_status.events_archived, static_cast<int64_t>(batch.size()));
       // last_flush_utime: reuse the newest event's start time as a cheap,
       // clock-free stamp (wall-clock calls are avoided by convention; the event
       // carries a server-provided time).

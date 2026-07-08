@@ -21,9 +21,12 @@
 namespace vsql_stat {
 
 // One captured statement event -- a plain, backend-agnostic row built on the
-// connection thread by the POSTEXECUTE hook and shipped by a sink. The field
-// set mirrors the subset of StatementEventArgs the core captures; sinks read
-// whatever they need from it.
+// connection thread by the POSTEXECUTE hook and shipped by a sink. It captures
+// every field StatementEventArgs exposes; sinks read whatever they need from
+// it. Capturing everything keeps all downstream options open (a field dropped
+// at capture can never be filtered, grouped, or aggregated later); trimming the
+// volume is a later optimization (a filter or a capture toggle), not a reason
+// to discard fields here.
 struct EventRow {
   std::string query; // truncated to statement_max_bytes
   std::string user;
@@ -31,15 +34,52 @@ struct EventRow {
   std::string schema;
   std::string sql_command;
   uint64_t connection_id = 0;
-  bool in_transaction = false;  // was the statement inside an open transaction
-  uint64_t query_start_utime = 0;
+  uint16_t port = 0;           // client port
+  bool in_transaction = false; // was the statement inside an open transaction
+
+  // Outcome.
+  int status = 0;            // 0 on success, else the MySQL error code
+  std::string sqlstate;      // 5-char SQLSTATE, empty on success
+  std::string error_message; // error text, empty on success
+  uint64_t warning_count = 0;
+
+  // Timing.
+  uint64_t query_start_utime = 0; // microseconds since epoch
   double query_time_secs = 0.0;
   double lock_time_secs = 0.0;
+
+  // Rows and bytes.
   uint64_t rows_sent = 0;
   uint64_t rows_examined = 0;
   uint64_t rows_affected = 0;
-  uint64_t warning_count = 0;
-  int status = 0;
+  uint64_t bytes_sent = 0;
+  uint64_t bytes_received = 0;
+
+  // Normalized (digested) query -- literals stripped, for grouping similar
+  // queries regardless of literal values. Empty if digest was disabled or the
+  // query was too long to digest.
+  std::string digest_text;
+
+  // Optimizer quality indicators (non-zero suggests inefficient execution).
+  uint64_t select_full_join = 0;       // joins without usable index
+  uint64_t select_full_range_join = 0; // joins using range on ref table
+  uint64_t select_range = 0;           // range scans on first table
+  uint64_t select_range_check = 0;     // joins with key check per row
+  uint64_t select_scan = 0;            // full scans of first table
+
+  // Sort metrics.
+  uint64_t sort_merge_passes = 0; // merge passes (high = large sort)
+  uint64_t sort_range = 0;        // sorts using a range
+  uint64_t sort_rows = 0;         // rows sorted
+  uint64_t sort_scan = 0;         // sorts using a full table scan
+
+  // Temporary table usage.
+  uint64_t created_tmp_tables = 0;      // tmp tables created (memory or disk)
+  uint64_t created_tmp_disk_tables = 0; // tmp tables spilled to disk
+
+  // Index usage.
+  bool no_index_used = false;      // ran without a usable index
+  bool no_good_index_used = false; // no good index was found
 };
 
 } // namespace vsql_stat
