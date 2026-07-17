@@ -60,6 +60,11 @@ struct EventRow {
   // query was too long to digest.
   std::string digest_text;
 
+  // Digest hash: the statement identity as a 64-char hex string (the same value
+  // performance_schema exposes as DIGEST). Compact GROUP BY key; empty when no
+  // digest is available.
+  std::string digest_hash;
+
   // Optimizer quality indicators (non-zero suggests inefficient execution).
   uint64_t select_full_join = 0;       // joins without usable index
   uint64_t select_full_range_join = 0; // joins using range on ref table

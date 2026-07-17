@@ -104,6 +104,7 @@ void on_statement(
   row.bytes_sent = args.bytes_sent();
   row.bytes_received = args.bytes_received();
   row.digest_text = arg_str(args.digest_text());
+  row.digest_hash = arg_str(args.digest_hash());
   row.select_full_join = args.select_full_join();
   row.select_full_range_join = args.select_full_range_join();
   row.select_range = args.select_range();
