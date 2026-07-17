@@ -85,6 +85,17 @@ struct EventRow {
   // Index usage.
   bool no_index_used = false;      // ran without a usable index
   bool no_good_index_used = false; // no good index was found
+
+  // Handler row-access counters (the slow log's Read_* fields) -- how rows were
+  // accessed at the storage-engine level. read_rnd_next high = full table scan;
+  // read_key/read_next = index access.
+  uint64_t read_first = 0;
+  uint64_t read_last = 0;
+  uint64_t read_key = 0;
+  uint64_t read_next = 0;
+  uint64_t read_prev = 0;
+  uint64_t read_rnd = 0;
+  uint64_t read_rnd_next = 0;
 };
 
 } // namespace vsql_stat

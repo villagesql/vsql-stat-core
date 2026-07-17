@@ -118,6 +118,13 @@ void on_statement(
   row.created_tmp_disk_tables = args.created_tmp_disk_tables();
   row.no_index_used = args.no_index_used();
   row.no_good_index_used = args.no_good_index_used();
+  row.read_first = args.read_first();
+  row.read_last = args.read_last();
+  row.read_key = args.read_key();
+  row.read_next = args.read_next();
+  row.read_prev = args.read_prev();
+  row.read_rnd = args.read_rnd();
+  row.read_rnd_next = args.read_rnd_next();
 
   // Per-sink filter before we spend a queue slot (e.g. slow-log threshold).
   if (!g_sink->accept(row))
