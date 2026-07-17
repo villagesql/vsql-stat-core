@@ -46,26 +46,28 @@ namespace vsql_stat {
 // (the pointers), not the pointees; the caller must keep the pointees alive for
 // the extension's lifetime.
 struct Config {
-  int64_t *queue_capacity;      // events (queue built lazily from this)
-  int64_t *batch_max;           // flush at this many queued events
-  int64_t *flush_interval_ms;   // flush at least this often
-  int64_t *statement_max_bytes; // truncate captured query text
+  long long *queue_capacity;      // events (queue built lazily from this)
+  long long *batch_max;           // flush at this many queued events
+  long long *flush_interval_ms;   // flush at least this often
+  long long *statement_max_bytes; // truncate captured query text
 };
 
-// Status counters (backed by the core status vars each sink declares). int64_t
-// because the status-var capability reads them via int64_t*; concurrent access
-// uses relaxed atomic ops (see the .cc). Written by the hook (many connection
+// Status counters (backed by the core status vars each sink declares). long
+// long because the sys-var and status-var capabilities bind these via
+// `long long *` (make_int); int64_t is `long` on LP64 Linux, which does not
+// convert to `long long *` even though both are 64-bit. Concurrent access uses
+// relaxed atomic ops (see the .cc). Written by the hook (many connection
 // threads) and the worker; read by SHOW STATUS.
 //
 // Lifetime: borrowed pointers into the sink's sysvar-backed globals, same
 // contract as Config -- must outlive the extension.
 struct Status {
-  int64_t *events_captured;
-  int64_t *events_archived;
-  int64_t *events_dropped;
-  int64_t *queue_depth;
-  int64_t *flush_errors;
-  int64_t *last_flush_utime;
+  long long *events_captured;
+  long long *events_archived;
+  long long *events_dropped;
+  long long *queue_depth;
+  long long *flush_errors;
+  long long *last_flush_utime;
 };
 
 // Set the active sink + the config/status bindings. Called once at load from

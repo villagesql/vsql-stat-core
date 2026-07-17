@@ -24,15 +24,15 @@ namespace vsql_stat {
 
 namespace {
 
-// Status counters are int64_t (the status-var capability reads them via
-// int64_t*). Concurrent access -- hook on many connection threads, worker on
-// its own -- uses relaxed atomic ops on the storage in place. (std::atomic_ref
-// is the C++20 way; these __atomic builtins are the C++17-safe equivalent on
-// GCC/Clang.)
-inline void atomic_add(int64_t *v, int64_t n) {
+// Status counters are long long (the sys-var/status-var capabilities bind them
+// via long long*; see capture_pipeline.h). Concurrent access -- hook on many
+// connection threads, worker on its own -- uses relaxed atomic ops on the
+// storage in place. (std::atomic_ref is the C++20 way; these __atomic builtins
+// are the C++17-safe equivalent on GCC/Clang.)
+inline void atomic_add(long long *v, long long n) {
   __atomic_fetch_add(v, n, __ATOMIC_RELAXED);
 }
-inline void atomic_store(int64_t *v, int64_t n) {
+inline void atomic_store(long long *v, long long n) {
   __atomic_store_n(v, n, __ATOMIC_RELAXED);
 }
 
