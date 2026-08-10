@@ -52,11 +52,9 @@ struct Config {
   long long *statement_max_bytes; // truncate captured query text
 };
 
-// Status counters (backed by the core status vars each sink declares). long
-// long because the sys-var and status-var capabilities bind these via
-// `long long *` (make_int); int64_t is `long` on LP64 Linux, which does not
-// convert to `long long *` even though both are 64-bit. Concurrent access uses
-// relaxed atomic ops (see the .cc). Written by the hook (many connection
+// Status counters (backed by the core status vars each sink declares). int64_t
+// because the status-var capability reads them via int64_t*; concurrent access
+// uses relaxed atomic ops (see the .cc). Written by the hook (many connection
 // threads) and the worker; read by SHOW STATUS.
 //
 // Lifetime: borrowed pointers into the sink's sysvar-backed globals, same

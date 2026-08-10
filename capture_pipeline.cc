@@ -24,15 +24,15 @@ namespace vsql_stat {
 
 namespace {
 
-// Status counters are long long (the sys-var/status-var capabilities bind them
-// via long long*; see capture_pipeline.h). Concurrent access -- hook on many
-// connection threads, worker on its own -- uses relaxed atomic ops on the
-// storage in place. (std::atomic_ref is the C++20 way; these __atomic builtins
-// are the C++17-safe equivalent on GCC/Clang.)
-inline void atomic_add(long long *v, long long n) {
+// Status counters are int64_t (the status-var capability reads them via
+// int64_t*). Concurrent access -- hook on many connection threads, worker on
+// its own -- uses relaxed atomic ops on the storage in place. (std::atomic_ref
+// is the C++20 way; these __atomic builtins are the C++17-safe equivalent on
+// GCC/Clang.)
+inline void atomic_add(long long *v, int64_t n) {
   __atomic_fetch_add(v, n, __ATOMIC_RELAXED);
 }
-inline void atomic_store(long long *v, long long n) {
+inline void atomic_store(long long *v, int64_t n) {
   __atomic_store_n(v, n, __ATOMIC_RELAXED);
 }
 
@@ -104,7 +104,6 @@ void on_statement(
   row.bytes_sent = args.bytes_sent();
   row.bytes_received = args.bytes_received();
   row.digest_text = arg_str(args.digest_text());
-  row.digest_hash = arg_str(args.digest_hash());
   row.select_full_join = args.select_full_join();
   row.select_full_range_join = args.select_full_range_join();
   row.select_range = args.select_range();
@@ -118,13 +117,6 @@ void on_statement(
   row.created_tmp_disk_tables = args.created_tmp_disk_tables();
   row.no_index_used = args.no_index_used();
   row.no_good_index_used = args.no_good_index_used();
-  row.read_first = args.read_first();
-  row.read_last = args.read_last();
-  row.read_key = args.read_key();
-  row.read_next = args.read_next();
-  row.read_prev = args.read_prev();
-  row.read_rnd = args.read_rnd();
-  row.read_rnd_next = args.read_rnd_next();
 
   // Per-sink filter before we spend a queue slot (e.g. slow-log threshold).
   if (!g_sink->accept(row))
