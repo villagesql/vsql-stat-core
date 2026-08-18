@@ -7,6 +7,9 @@ vendors these files under its own `core/` directory (via `git subtree`) and
 compiles them into its `.veb`. The only build here is the standalone unit test
 (below).
 
+**Docs:** [VillageSQL documentation](https://villagesql.com/docs) ·
+[Install VillageSQL Server](https://villagesql.com/install)
+
 ## What's here
 
 Sources live at the repo root (so a sink's `git subtree add --prefix=core`
