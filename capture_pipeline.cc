@@ -117,6 +117,9 @@ void on_statement(
   row.created_tmp_disk_tables = args.created_tmp_disk_tables();
   row.no_index_used = args.no_index_used();
   row.no_good_index_used = args.no_good_index_used();
+  row.client_pid = arg_str(args.client_pid());
+  row.client_name = arg_str(args.client_name());
+  row.program_name = arg_str(args.program_name());
 
   // Per-sink filter before we spend a queue slot (e.g. slow-log threshold).
   if (!g_sink->accept(row))
