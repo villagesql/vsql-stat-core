@@ -104,6 +104,7 @@ void on_statement(
   row.bytes_sent = args.bytes_sent();
   row.bytes_received = args.bytes_received();
   row.digest_text = arg_str(args.digest_text());
+  row.digest_hash = arg_str(args.digest_hash());
   row.select_full_join = args.select_full_join();
   row.select_full_range_join = args.select_full_range_join();
   row.select_range = args.select_range();
@@ -117,6 +118,16 @@ void on_statement(
   row.created_tmp_disk_tables = args.created_tmp_disk_tables();
   row.no_index_used = args.no_index_used();
   row.no_good_index_used = args.no_good_index_used();
+  row.read_first = args.read_first();
+  row.read_last = args.read_last();
+  row.read_key = args.read_key();
+  row.read_next = args.read_next();
+  row.read_prev = args.read_prev();
+  row.read_rnd = args.read_rnd();
+  row.read_rnd_next = args.read_rnd_next();
+  row.client_pid = arg_str(args.client_pid());
+  row.client_name = arg_str(args.client_name());
+  row.program_name = arg_str(args.program_name());
 
   // Per-sink filter before we spend a queue slot (e.g. slow-log threshold).
   if (!g_sink->accept(row))

@@ -96,6 +96,15 @@ struct EventRow {
   uint64_t read_prev = 0;
   uint64_t read_rnd = 0;
   uint64_t read_rnd_next = 0;
+
+  // Client connection attributes (session_connect_attrs) -- sent once by the
+  // client at handshake, constant for the connection. Empty when the client did
+  // not send that attribute.
+  std::string client_pid;    // client OS process id (the "_pid" attribute)
+  std::string client_name;   // connector/driver library ("_client_name"),
+                             // e.g. "libmysql", "mysql-connector-j"
+  std::string program_name;  // application name if the client set it
+                             // ("program_name"), e.g. "mysql", "mysqldump"
 };
 
 } // namespace vsql_stat
